@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">" Give me a scare"</string>
+    <string name="numero_Sustos">Enter Nº Scares</string>
+    <string name="button_sustos">Scares</string>
+</resources>

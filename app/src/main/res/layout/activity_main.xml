@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearlayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_row="1"
+    android:layout_rowSpan="1"
+    android:layout_column="1"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="95dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/editTextNumberSigned"
+            android:layout_width="164dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="42dp"
+            android:layout_marginTop="36dp"
+            android:layout_marginEnd="40dp"
+            android:ems="10"
+            android:hint="@string/numero_Sustos"
+            android:inputType="numberSigned"
+            app:layout_constraintEnd_toStartOf="@+id/buttonSustos"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/buttonSustos"
+            android:layout_width="104dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="36dp"
+            android:layout_marginEnd="28dp"
+            android:background="#673AB7"
+            android:text="@string/button_sustos"
+            app:backgroundTint="#9C27B0"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </LinearLayout>
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="403dp">
+
+        <LinearLayout
+            android:id="@+id/linearlayoutVertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>
