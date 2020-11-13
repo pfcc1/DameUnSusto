@@ -68,16 +68,12 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
             R.raw.chainsaw, R.raw.man_waten_by_dog,
             R.raw.animal_sounds, R.raw.torment};
     boolean hiloActivo;
-    boolean borrarControles = false;
     int valorIBorrar;
     ReproduccionSonidos reproduccionSonidos;
     Handler thisHandler;
     String [] segundosEspecificados;
     Locale idiomaDefectoSistema = Locale.getDefault();
-    CountDownTimer [] countDownTimer;
-    long s;
     int contadorCuentaAtras;
-    int bandera;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -129,7 +125,6 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
         arraySpinnerSonidos = new Spinner[numeroSustos];
         mediaPlayers = new MediaPlayer[numeroSustos];
         segundosEspecificados=new String[numeroSustos];
-        countDownTimer=new CountDownTimer[numeroSustos];
 
 
         for (int i = 0; i < numeroSustos; i++) {
@@ -219,19 +214,6 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
 
                         valorIBorrar = ii;
 
-
-                       if (arrayEditTextSegundos[ii].getText().toString() == "0") {
-
-
-                        } else {
-                            int seg = Integer.parseInt(arrayEditTextSegundos[ii].getText().toString());
-                            int segundos = seg * 1000/1000;
-                            segundosEspecificados[ii] = String.valueOf(segundos);
-
-
-                        }
-
-
                     }
 
                 });
@@ -285,12 +267,18 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
         @Override
         protected String doInBackground(String... strings) {
 
-            contadorCuentaAtras = Integer.parseInt(segundosEspecificados[valorIBorrar]);
+      //Comprobar el Editext que tiene un valor mayor que 0 y almacenarlo y salir del Bucle
+            for(int i=0;i<numeroSustos;i++){
+                contadorCuentaAtras = Integer.parseInt(arrayEditTextSegundos[i].getText().toString());
+                if(contadorCuentaAtras>0){
+                    valorIBorrar=i;
+                    break;
+                }
 
-
-            while (true) {
+            }
 
                 while (hiloActivo) {
+
 
                     //Si se esta Reproduciendo
                     if (mediaPlayer.isPlaying()) {
@@ -329,10 +317,9 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
 
                             System.out.println("Hilo ACtivo: " + hiloActivo);
 
+                                mediaPlayer.reset();
                                 mediaPlayer.release();//Retirar los recursos de memoria y procesador asignados a MediaPlayer
                                 reproduccionSonidos.cancel(true);//Interrumpir el metodo doInbackground y ir al método Cancel
-
-
                         }
 
                     }   //Si no se esta reproduciendo
@@ -354,11 +341,14 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
 
                                      publishProgress("0");
                                      mediaPlayer.start();
+
                                  }
                              } else {
                                  //Si no he especificado los segundos comienza al darle al Play
 
-                                 mediaPlayer.start();
+                                     mediaPlayer.start();
+
+
                              }
                          }
                     if (Looper.myLooper() == null) {
@@ -368,7 +358,7 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
                     thisHandler = new Handler();
                     }
 
-            }
+            return null;
 
         }
             @Override
@@ -387,7 +377,7 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
         protected void onProgressUpdate(String... values) {
             arrayEditTextSegundos[valorIBorrar].setText(String.valueOf(values[0]));
         }
-
+//Cuando termina de reproducir un sonido se viene al método onCancelled
         @Override
             protected void onCancelled (String s){
                 hiloActivo = true;//Pongo el hilo Activo, para cuando pulse
@@ -399,10 +389,27 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
                 //Habilitar los botones para poder otra vez darle al Play
                 for(int j=0;j<numeroSustos;j++){
                     arrayButtonPlay[j].setEnabled(true);
+                }
 
+
+                System.out.println("Estoy en OnCancelled");
+
+
+
+            //Comprueba si hay algún EditText que tenga más de 0 segundos
+                for(int i=0;i<numeroSustos;i++){
+                    contadorCuentaAtras = Integer.parseInt(arrayEditTextSegundos[i].getText().toString());
+
+                    valorIBorrar=i;
+
+                    if(contadorCuentaAtras>0){
+                        mediaPlayers[i] = MediaPlayer.create(MainActivity.this, sonidos[i]);
+                        onPrepared(mediaPlayers[valorIBorrar]);//Vuelve a ejecutar el Asyntask
+                        break;
+
+                    }
 
                 }
-                System.out.println("Estoy en OnCancelled");
 
             }
 
