@@ -208,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
 
 
 
-                        mediaPlayers[ii] = MediaPlayer.create(MainActivity.this, sonidos[ii]);
+                        mediaPlayers[ii] = MediaPlayer.create(getApplicationContext(), sonidos[ii]);
                         onPrepared(mediaPlayers[ii]);
 
 
@@ -245,7 +245,6 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
         reproduccionSonidos.execute();
 
     }
-
 
 
     private class ReproduccionSonidos extends AsyncTask<String, String, String> {
@@ -313,13 +312,14 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
 
                         //Si la posicion actual en segundos es igual a la duracion total
                         // de la canción pues se para
-                        if (mediaPlayer.getCurrentPosition() == mediaPlayer.getDuration()) {
+                       if (mediaPlayer.getCurrentPosition() == mediaPlayer.getDuration()) {
 
                             System.out.println("Hilo ACtivo: " + hiloActivo);
-
-                                mediaPlayer.reset();
-                                mediaPlayer.release();//Retirar los recursos de memoria y procesador asignados a MediaPlayer
-                                reproduccionSonidos.cancel(true);//Interrumpir el metodo doInbackground y ir al método Cancel
+                            mediaPlayer.stop();
+                            mediaPlayer.reset();
+                            mediaPlayer.release();//Retirar los recursos de memoria y procesador asignados a MediaPlayer
+                            reproduccionSonidos.cancel(true);//Interrumpir el metodo doInbackground y ir al método Cancel
+                            break;
                         }
 
                     }   //Si no se esta reproduciendo
@@ -339,16 +339,14 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
                                      publishProgress(contadorCuentaAtras + "");
                                  } else {
 
-                                     publishProgress("0");
-                                     mediaPlayer.start();
+
+                                         publishProgress("0");
+                                         mediaPlayer.start();
 
                                  }
                              } else {
                                  //Si no he especificado los segundos comienza al darle al Play
-
                                      mediaPlayer.start();
-
-
                              }
                          }
                     if (Looper.myLooper() == null) {
@@ -403,7 +401,7 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
                     valorIBorrar=i;
 
                     if(contadorCuentaAtras>0){
-                        mediaPlayers[i] = MediaPlayer.create(MainActivity.this, sonidos[i]);
+                        mediaPlayers[i] = MediaPlayer.create(getApplicationContext(), sonidos[i]);
                         onPrepared(mediaPlayers[valorIBorrar]);//Vuelve a ejecutar el Asyntask
                         break;
 
@@ -415,7 +413,6 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
 
 
         }
-
 
 
 
