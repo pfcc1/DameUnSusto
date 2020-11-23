@@ -8,6 +8,7 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -65,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
     MediaPlayer[] mediaPlayers;
     int[] sonidos = {R.raw.bees, R.raw.bell_tool, R.raw.electric_sparks,
             R.raw.chopping, R.raw.wolf,R.raw.lab_machines,
-            R.raw.chainsaw, R.raw.man_waten_by_dog,
+             R.raw.man_waten_by_dog,R.raw.chainsaw,
             R.raw.animal_sounds, R.raw.torment};
     boolean hiloActivo;
     int valorIBorrar;
@@ -74,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
     String [] segundosEspecificados;
     Locale idiomaDefectoSistema = Locale.getDefault();
     int contadorCuentaAtras;
+    int bandera=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
                if (numeroSustos >= 11 || numeroSustos<=0) {
                     Toast.makeText(getApplicationContext(), "El rango está comprendido entre 1 y 10", Toast.LENGTH_SHORT).show();
                 }
-                else if(editTextNumeroSustos.getText().toString()==""){
+                else if(editTextNumeroSustos.getText().toString()==null){
                     Toast.makeText(getApplicationContext(), "No ha introducido un número", Toast.LENGTH_SHORT).show();
                 }
                 else {
@@ -140,6 +142,8 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
             arraySpinnerSonidos[i].setX(5);
             arraySpinnerSonidos[i].setY(300);
 
+
+            //Traducción de manera dinámica
 
             ArrayList<String> arrayListSonidos = new ArrayList<>();
 
@@ -191,33 +195,34 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
 
 
             int ii = i;
-            if (arrayButtonPlay[i].getId() == idBotonPlay[i]) {
+
 
                 arrayButtonPlay[i].setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        //Inhanilitar el boton del Play
-                        // para evitar que de un error cuando esta reproduciendo al pulsar varias veces
-                        for(int j=0;j<numeroSustos;j++){
-                            arrayButtonPlay[j].setEnabled(false);
+                        if (view.getId() == arrayButtonPlay[ii].getId()) {
+                            //Inhanilitar el boton del Play
+                            // para evitar que de un error cuando esta reproduciendo al pulsar varias veces
+                            for (int j = 0; j < numeroSustos; j++) {
+                                arrayButtonPlay[j].setEnabled(false);
+                            }
+                            System.out.println("ID :" + view.getId());
+                            System.out.println("Valor: " + ii);
+                            System.out.println("SOnidos Longitud Array: " + sonidos.length);
+                            System.out.println("Numero Sustos: " + numeroSustos);
+
+
+                            mediaPlayers[ii] = MediaPlayer.create(getApplicationContext(), sonidos[ii]);
+                            onPrepared(mediaPlayers[ii]);
+
+
+                            valorIBorrar = ii;
+
                         }
-                        System.out.println("ID :" + view.getId());
-                        System.out.println("Valor: " + ii);
-                        System.out.println("SOnidos Longitud Array: " + sonidos.length);
-                        System.out.println("Numero Sustos: " + numeroSustos);
-
-
-
-                        mediaPlayers[ii] = MediaPlayer.create(getApplicationContext(), sonidos[ii]);
-                        onPrepared(mediaPlayers[ii]);
-
-
-                        valorIBorrar = ii;
-
                     }
 
                 });
-            }
+
 
 
             linearlayout.addView(arrayEditTextSegundos[i]);
@@ -270,8 +275,11 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
             for(int i=0;i<numeroSustos;i++){
                 contadorCuentaAtras = Integer.parseInt(arrayEditTextSegundos[i].getText().toString());
                 if(contadorCuentaAtras>0){
-                    valorIBorrar=i;
-                    break;
+                    
+                    if (valorIBorrar==i){
+                        break;
+                    }
+
                 }
 
             }
@@ -312,13 +320,18 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
 
                         //Si la posicion actual en segundos es igual a la duracion total
                         // de la canción pues se para
-                       if (mediaPlayer.getCurrentPosition() == mediaPlayer.getDuration()) {
+
+                        if(Build.VERSION.SDK_INT<26){//Para Android Anterior a Oreo
+                            bandera=1;
+                        }
+                      else if (mediaPlayer.getCurrentPosition() == mediaPlayer.getDuration()) {//Para Android Superior a Oreo
 
                             System.out.println("Hilo ACtivo: " + hiloActivo);
                             mediaPlayer.stop();
                             mediaPlayer.reset();
                             mediaPlayer.release();//Retirar los recursos de memoria y procesador asignados a MediaPlayer
-                            reproduccionSonidos.cancel(true);//Interrumpir el metodo doInbackground y ir al método Cancel
+                           mediaPlayer=null;
+                           reproduccionSonidos.cancel(true);//Interrumpir el metodo doInbackground y ir al método Cancel
                             break;
                         }
 
@@ -339,14 +352,29 @@ public class MainActivity extends AppCompatActivity implements OnPreparedListene
                                      publishProgress(contadorCuentaAtras + "");
                                  } else {
 
-
                                          publishProgress("0");
                                          mediaPlayer.start();
 
                                  }
                              } else {
                                  //Si no he especificado los segundos comienza al darle al Play
+                                 if(Build.VERSION.SDK_INT<26){//Para Android Anterior a Oreo
+                                     if(bandera==1){//Cuando termina de Reproducir entra por aquí
+                                        bandera=0;
+                                         mediaPlayer.stop();
+                                         mediaPlayer.reset();
+                                         mediaPlayer.release();
+                                         reproduccionSonidos.cancel(true);//Interrumpir el metodo doInbackground y ir al método Cancel
+                                        break;
+                                     }
+                                     else{//Cuando le doy al Play Reproduce
+                                         mediaPlayer.start();
+                                     }
+
+                                 }
+                                 else{//Si la Versión de Android es superior a Oreo
                                      mediaPlayer.start();
+                                 }
                              }
                          }
                     if (Looper.myLooper() == null) {
